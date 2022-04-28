@@ -1,0 +1,22 @@
+{
+  "name": "ngekoding/codeigniter-datatables",
+  "description": "DataTables server-side for CodeIgniter",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Nur Muhammad",
+      "email": "blog.nurmuhammad@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.6",
+    "symfony/http-foundation": "^3.4",
+    "greenlion/php-sql-parser": "^4.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ngekoding\\CodeIgniterDataTables\\": "src"
+    }
+  }
+}

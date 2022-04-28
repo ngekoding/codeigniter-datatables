@@ -2,7 +2,7 @@
 
 DataTables server-side for CodeIgniter, supported both for CodeIgniter 3 and CodeIgniter 4.
 
-**Note:** This library only handle the server-side part, you still needs to configure a client side like jQuery, DataTables library and including the styles.
+**Note:** This library only handle the server-side part, you still needs to configure the client side like jQuery, DataTables library and including the styles.
 
 ## Requirements
 
@@ -62,7 +62,7 @@ $datatables->generate(); // done
 
 You must include the jQuery and DataTables library.
 
-```php
+```html
 <link src="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 
 <table id="table-post">
@@ -101,7 +101,7 @@ $datatables->asObject()
 
 And then you can configure the client side with columns option to fit your data.
 
-```php
+```js
 $('#table-post').DataTable({
   processing: true,
   serverSide: true,

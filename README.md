@@ -171,3 +171,16 @@ $datatables->addSequenceNumber('rowNumber'); // It will be rowNumber
 // Don't forget ot call generate to get the results
 $datatables->generate();
 ```
+
+## Another Example
+
+I already use this library to the existing project with completed CRUD operations, you can found it [here](https://github.com/ngekoding/ci-crud). 
+
+Please look at these files:
+- application/composer.json
+- application/controllers/Post.php
+- application/models/M_post.php
+- application/views/template.php
+- application/views/posts/index-datatables.php
+- application/helpers/api_helper.php
+- assets/js/custom.js

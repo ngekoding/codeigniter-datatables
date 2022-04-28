@@ -202,7 +202,7 @@ class DataTables
      */
     protected function limit()
     {
-        if (($start = $this->request->get('start')) && ($length = $this->request->get('length')) != -1) {
+        if (($start = $this->request->get('start')) !== NULL && ($length = $this->request->get('length')) != -1) {
 			$this->queryBuilder->{$this->config->get('limit')}($length, $start);
 		}
     }

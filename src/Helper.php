@@ -33,4 +33,19 @@ class Helper
 
         return $columnAliases;
     }
+
+    /**
+     * Get all select fields result
+     * Used when we use the arrays data source for ordering
+     * @param $queryBuilder
+     * @param Config $config
+     * 
+     * @return array
+     */
+    public static function getFieldNames($queryBuilder, $config)
+    {
+        return $queryBuilder->where('0=1') // We don't need any data
+                            ->{$config->get('get')}()
+                            ->{$config->get('getFieldNames')}();
+    }
 }

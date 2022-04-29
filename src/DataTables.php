@@ -13,6 +13,8 @@ class DataTables
     protected $request;
     protected $queryBuilder;
     protected $columnAliases = [];
+    protected $fieldNames = [];
+    protected $returnedFieldNames = [];
     protected $formatters = [];
     protected $extraColumns = [];
     
@@ -44,6 +46,11 @@ class DataTables
 
         $qbSelect = $replection->getValue($queryBuilder);
         $this->columnAliases = Helper::getColumnAliases($qbSelect);
+
+        // When getting the field names, the query builder will be changed
+        // So we need to make a clone to keep the original
+        $queryBuilderClone = clone $queryBuilder;
+        $this->fieldNames = Helper::getFieldNames($queryBuilderClone, $this->config);
 
         $this->recordsTotal = $this->queryBuilder->{$this->config->get('countAllResults')}('', FALSE);
     }
@@ -107,6 +114,30 @@ class DataTables
     }
 
     /**
+     * Set the returned field names base on only & except
+     * We will use the only first if defined
+     * So you must use either only or except (not both)
+     */
+    protected function setReturnedFieldNames()
+    {
+        if ( ! empty($this->only)) {
+            foreach ($this->fieldNames as $field) {
+                if (in_array($field, $this->only)) {
+                    array_push($this->returnedFieldNames, $field);
+                }
+            }
+        } elseif ( ! empty($this->except)) {
+            foreach ($this->fieldNames as $field) {
+                if ( ! in_array($field, $this->except)) {
+                    array_push($this->returnedFieldNames, $field);
+                }
+            }
+        } else {
+            $this->returnedFieldNames = $this->fieldNames;
+        }
+    }
+
+    /**
      * Add sequence number to the output
      * @param string $key Used when returning object output as the key
      */
@@ -129,10 +160,25 @@ class DataTables
 		if ($this->request->get('search') && ($keyword = $this->request->get('search')['value']) != '') {
 			foreach ($this->request->get('columns') as $request_column) {
 				if (filter_var($request_column['searchable'], FILTER_VALIDATE_BOOLEAN)) {
+                    $column = $request_column['data'];
+
+                    if ( ! $this->asObject) {
+                        // Skip sequence number
+                        if ($column == 0) continue;
+
+                        $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
+
+                        // Skip extra column
+                        $fieldNamesLength = count($this->returnedFieldNames);
+                        if ($fieldIndex > $fieldNamesLength - 1) break;
+                        
+                        $column = $this->returnedFieldNames[$fieldIndex];
+                    }
+
                     // Checking if it using a column alias
-                    $column = isset($this->columnAliases[$request_column['data']])
-                                ? $this->columnAliases[$request_column['data']]
-                                : $request_column['data'];
+                    $column = isset($this->columnAliases[$column])
+                                ? $this->columnAliases[$column]
+                                : $column;
 					
 					$globalSearch[] = sprintf("`%s` LIKE '%%%s%%'", $column, $keyword);
 				}
@@ -145,10 +191,25 @@ class DataTables
 				filter_var($request_column['searchable'], FILTER_VALIDATE_BOOLEAN) &&
 				($keyword = $request_column['search']['value']) != ''
 			) {
+                $column = $request_column['data'];
+
+                if ( ! $this->asObject) {
+                    // Skip sequence number
+                    if ($column == 0) continue;
+
+                    $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
+
+                    // Skip extra column
+                    $fieldNamesLength = count($this->returnedFieldNames);
+                    if ($fieldIndex > $fieldNamesLength - 1) break;
+                    
+                    $column = $this->returnedFieldNames[$fieldIndex];
+                }
+
                 // Checking if it using a column alias
-                $column = isset($this->columnAliases[$request_column['data']])
-                            ? $this->columnAliases[$request_column['data']]
-                            : $request_column['data'];
+                    $column = isset($this->columnAliases[$column])
+                                ? $this->columnAliases[$column]
+                                : $column;
 
 				$columnSearch[] = sprintf("`%s` LIKE '%%%s%%'", $column, $keyword);
 			}
@@ -184,9 +245,23 @@ class DataTables
 			foreach ($this->request->get('order') as $order) {
 				$column_idx = $order['column'];
 				$request_column = $this->request->get('columns')[$column_idx];
-                $column = $request_column['data'];
-
+                
 				if (filter_var($request_column['orderable'], FILTER_VALIDATE_BOOLEAN)) {
+                    $column = $request_column['data'];
+
+                    if ( ! $this->asObject) {
+                        // Skip sequence number
+                        if ($column == 0) continue;
+                        
+                        $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
+                        
+                        // Skip extra column
+                        $fieldNamesLength = count($this->returnedFieldNames);
+                        if ($fieldIndex > $fieldNamesLength - 1) break;
+
+                        $column = $this->returnedFieldNames[$fieldIndex];
+                    }
+
 					$orders[] = sprintf('`%s` %s', $column, strtoupper($order['dir']));
 				}
 			}
@@ -223,30 +298,12 @@ class DataTables
      */
     public function generate()
     {
+        $this->setReturnedFieldNames();
         $this->filter();
 		$this->order();
 		$this->limit();
 
 		$result = $this->queryBuilder->{$this->config->get('get')}();
-
-        $fields = $result->{$this->config->get('getFieldNames')}();
-        $fieldsFiltered = [];
-        
-        if ( ! empty($this->only)) {
-            foreach ($this->only as $field) {
-                if (in_array($field, $fields)) {
-                    array_push($fieldsFiltered, $field);
-                }
-            }
-        } elseif ( ! empty($this->except)) {
-            foreach ($fields as $field) {
-                if ( ! in_array($field, $this->except)) {
-                    array_push($fieldsFiltered, $field);
-                }
-            }
-        } else {
-            $fieldsFiltered = $fields;
-        }
 
 		$output = [];
         
@@ -257,7 +314,7 @@ class DataTables
                 $row[$this->sequenceNumberKey] = $sequenceNumber++;
             }
 
-            foreach ($fieldsFiltered as $field) {
+            foreach ($this->returnedFieldNames as $field) {
                 $row[$field] = isset($this->formatters[$field])
                                 ? $this->formatters[$field]($res->$field, $res)
                                 : $res->$field;

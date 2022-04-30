@@ -157,6 +157,8 @@ class DataTables
         $globalSearch = [];
 		$columnSearch = [];
 
+        $fieldNamesLength = count($this->returnedFieldNames);
+
         // Global column filtering
 		if ($this->request->get('search') && ($keyword = $this->request->get('search')['value']) != '') {
 			foreach ($this->request->get('columns') as $request_column) {
@@ -170,7 +172,6 @@ class DataTables
                         $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
 
                         // Skip extra column
-                        $fieldNamesLength = count($this->returnedFieldNames);
                         if ($fieldIndex > $fieldNamesLength - 1) break;
                         
                         $column = $this->returnedFieldNames[$fieldIndex];
@@ -201,7 +202,6 @@ class DataTables
                     $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
 
                     // Skip extra column
-                    $fieldNamesLength = count($this->returnedFieldNames);
                     if ($fieldIndex > $fieldNamesLength - 1) break;
                     
                     $column = $this->returnedFieldNames[$fieldIndex];
@@ -243,6 +243,8 @@ class DataTables
     {
         if ($this->request->get('order') && count($this->request->get('order'))) {
 			$orders = [];
+            $fieldNamesLength = count($this->returnedFieldNames);
+            
 			foreach ($this->request->get('order') as $order) {
 				$column_idx = $order['column'];
 				$request_column = $this->request->get('columns')[$column_idx];
@@ -257,7 +259,6 @@ class DataTables
                         $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
                         
                         // Skip extra column
-                        $fieldNamesLength = count($this->returnedFieldNames);
                         if ($fieldIndex > $fieldNamesLength - 1) break;
 
                         $column = $this->returnedFieldNames[$fieldIndex];

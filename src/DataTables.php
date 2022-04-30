@@ -165,7 +165,7 @@ class DataTables
 
                     if ( ! $this->asObject) {
                         // Skip sequence number
-                        if ($column == 0) continue;
+                        if ($this->sequenceNumber && $column == 0) continue;
 
                         $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
 
@@ -196,7 +196,7 @@ class DataTables
 
                 if ( ! $this->asObject) {
                     // Skip sequence number
-                    if ($column == 0) continue;
+                    if ($this->sequenceNumber && $column == 0) continue;
 
                     $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
 
@@ -252,7 +252,7 @@ class DataTables
 
                     if ( ! $this->asObject) {
                         // Skip sequence number
-                        if ($column == 0) continue;
+                        if ($this->sequenceNumber && $column == 0) continue;
                         
                         $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
                         

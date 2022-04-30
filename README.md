@@ -61,9 +61,9 @@ $datatables->generate(); // done
 You must include the jQuery and DataTables library.
 
 ```html
-<link src="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
 
-<table id="table-post">
+<table id="table-post" class="display" width="100%">
   <thead>
     <th>ID</th>
     <th>Title</th>

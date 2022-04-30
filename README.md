@@ -6,9 +6,7 @@ DataTables server-side for CodeIgniter, supported both for CodeIgniter 3 and Cod
 
 ## Requirements
 
-The requirements is base on what version of CodeIgniter you use.
-- [CodeIgniter 3 Requirements](https://codeigniter.com/userguide3/general/requirements.html)
-- [CodeIgniter 4 Requirements](https://codeigniter.com/user_guide/intro/requirements.html)
+If you are using CodeIgniter, you can use this library with no extra requirement.
 
 ## Installation
 

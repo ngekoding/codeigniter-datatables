@@ -121,8 +121,9 @@ class DataTables
     protected function setReturnedFieldNames()
     {
         if ( ! empty($this->only)) {
-            foreach ($this->fieldNames as $field) {
-                if (in_array($field, $this->only)) {
+            // Keep fields order as defined
+            foreach ($this->only as $field) {
+                if (in_array($field, $this->fieldNames)) {
                     array_push($this->returnedFieldNames, $field);
                 }
             }

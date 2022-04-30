@@ -208,9 +208,9 @@ class DataTables
                 }
 
                 // Checking if it using a column alias
-                    $column = isset($this->columnAliases[$column])
-                                ? $this->columnAliases[$column]
-                                : $column;
+                $column = isset($this->columnAliases[$column])
+                            ? $this->columnAliases[$column]
+                            : $column;
 
 				$columnSearch[] = sprintf("`%s` LIKE '%%%s%%'", $column, $keyword);
 			}

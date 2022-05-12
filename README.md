@@ -1,12 +1,12 @@
 # CodeIgniter DataTables
 
-DataTables server-side for CodeIgniter, supported both for CodeIgniter 3 and CodeIgniter 4.
+DataTables server-side for CodeIgniter, supported for both CodeIgniter 3 and CodeIgniter 4.
 
-**Note:** This library only handle the server-side part, you still needs to configure the client side like jQuery, DataTables library and including the styles.
+**Note:** This library only handle the server-side part, you still needs to configure the client side like jQuery, DataTables library and including the styles. Don't worry, we already give the examples below.
 
 ## Requirements
 
-If you are using CodeIgniter, you can use this library with no extra requirement.
+If you are using CodeIgniter, let's go! You don't needs any extra requirements.
 
 ## Installation
 
@@ -160,6 +160,17 @@ $datatables->addColumn('action', function($row) {
   return '<a href="url/to/delete/post/'.$row->id.'">Delete</a>';
 });
 
+// Add column alias
+// It is very useful when we use SELECT JOIN to prevent column ambiguous
+$datatables->addColumnAlias('p.id', 'id');
+
+// Add column aliases
+// Same as the addColumnAlias, but for multiple alias at once
+$datatables->addColumnAliases([
+  'p.id' => 'id',
+  'c.name' => 'category'
+]);
+
 // Add squence number
 // The default key is `sequenceNumber`
 // You can change it with give the param
@@ -180,5 +191,6 @@ Please look at these files:
 - application/models/M_post.php
 - application/views/template.php
 - application/views/posts/index-datatables.php
+- application/views/posts/index-datatables-array.php
 - application/helpers/api_helper.php
 - assets/js/custom.js

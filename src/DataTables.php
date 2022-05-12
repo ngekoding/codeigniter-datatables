@@ -82,6 +82,39 @@ class DataTables
     }
 
     /**
+     * Add column alias
+     * Very useful when using SELECT JOIN to prevent column ambiguous
+     * @param string $key The key of the column name (e.g. including the table name: posts.id or p.id)
+     * @param string $alias The column alias
+     * 
+     * @return $this
+     */
+    public function addColumnAlias($key, $alias)
+    {
+        $this->columnAliases[$alias] = $key;
+        return $this;
+    }
+
+    /**
+     * Add multiple column alias
+     * @param array $aliases The column aliases with key => value format
+     * 
+     * @return $this
+     */
+    public function addColumnAliases($aliases)
+    {
+        if ( ! is_array($aliases)) {
+            throw new \Exception('The $aliases parameter must be an array.');
+        }
+
+        foreach ($aliases as $key => $alias) {
+            $this->addColumnAlias($key, $alias);
+        }
+
+        return $this;
+    }
+
+    /**
      * Only return the column as defined
      * @param string|array $columns The columns to only will be returned
      * 

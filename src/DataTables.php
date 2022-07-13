@@ -194,7 +194,7 @@ class DataTables
 
         // Global column filtering
 		if ($this->request->get('search') && ($keyword = $this->request->get('search')['value']) != '') {
-			foreach ($this->request->get('columns') as $request_column) {
+			foreach ($this->request->get('columns', []) as $request_column) {
 				if (filter_var($request_column['searchable'], FILTER_VALIDATE_BOOLEAN)) {
                     $column = $request_column['data'];
 
@@ -221,7 +221,7 @@ class DataTables
 		}
 
 		// Individual column filtering
-		foreach ($this->request->get('columns') as $request_column) {
+		foreach ($this->request->get('columns', []) as $request_column) {
 			if (
 				filter_var($request_column['searchable'], FILTER_VALIDATE_BOOLEAN) &&
 				($keyword = $request_column['search']['value']) != ''

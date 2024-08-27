@@ -2,15 +2,15 @@
 
 DataTables server-side for CodeIgniter, supported for both CodeIgniter 3 and CodeIgniter 4.
 
-**Note:** This library only handle the server-side part, you still needs to configure the client side like jQuery, DataTables library and including the styles. Don't worry, we already give the examples below.
+**Note:** This library only handle the server-side part, you will still need to set up the client-side components, such as jQuery, the DataTables library, and the necessary styles. **Don't worry, we've included examples below to help you get started.**
 
 ## Requirements
 
-If you are using CodeIgniter, let's go! You don't needs any extra requirements.
+No additional requirements are needed if you are already using CodeIgniter. Simply integrate this library into your existing project.
 
 ## Installation
 
-You just need to use composer and everything is done.
+To install the library, use Composer. This command will handle the installation process for you:
 
 ```sh
 composer require ngekoding/codeigniter-datatables
@@ -18,7 +18,9 @@ composer require ngekoding/codeigniter-datatables
 
 ## Usage
 
-Here is the basic example to use this library, you are freely make any changes for the client side, like defining searchable column, orderable column, etc...
+Below is a basic example of how to use this library. Feel free to customize the client-side configuration, such as defining searchable columns, orderable columns, and other DataTables options.
+
+The usage of this library is similar for both CodeIgniter 3 and CodeIgniter 4. **The primary difference is in how you create the query builder.** Below are examples for both versions.
 
 ### CodeIgniter 3 Example
 
@@ -27,16 +29,13 @@ Here is the basic example to use this library, you are freely make any changes f
 
 // Here we will select all fields from posts table
 // and make a join with categories table
-// Please note: we don't need to call ->get() here
+// IMPORTANT! We don't need to call ->get() here
 $queryBuilder = $this->db->select('p.*, c.name category')
                     ->from('posts p')
                     ->join('categories c', 'c.id=p.category_id');
 
-/**
- * The first parameter is the query builder instance
- * and the second is the codeigniter version (3 or 4) 
- */
-$datatables = new Ngekoding\CodeIgniterDataTables\DataTables($queryBuilder, '3');
+// The library will automatically detect the CodeIgniter version you are using
+$datatables = new Ngekoding\CodeIgniterDataTables\DataTables($queryBuilder);
 $datatables->generate(); // done
 ```
 
@@ -50,7 +49,8 @@ $queryBuilder = $db->from('posts p')
                    ->select('p.*, c.name category')
                    ->join('categories c', 'c.id=p.category_id');
 
-$datatables = new Ngekoding\CodeIgniterDataTables\DataTables($queryBuilder, '4');
+// The library will automatically detect the CodeIgniter version you are using
+$datatables = new Ngekoding\CodeIgniterDataTables\DataTables($queryBuilder);
 $datatables->generate(); // done
 ```
 
@@ -123,9 +123,8 @@ Some basic functionalities already available, here is the full settings you can 
 
 ### Use class for spesify the CodeIgniter version
 ```php
-// General, use the second param to define the version
-// The default is 4
-$datatables = new Ngekoding\CodeIgniterDataTables\DataTables($queryBuilder, '3');
+// General, use the second param to define the version (3 or 4)
+$datatables = new Ngekoding\CodeIgniterDataTables\DataTables($queryBuilder, 3);
 
 // CodeIgniter 3
 $datatables = new Ngekoding\CodeIgniterDataTables\DataTablesCodeIgniter3($queryBuilder);
@@ -177,15 +176,17 @@ $datatables->addColumnAliases([
 $datatables->addSequenceNumber();
 $datatables->addSequenceNumber('rowNumber'); // It will be rowNumber
 
-// Don't forget ot call generate to get the results
+// Don't forget to call generate to get the results
 $datatables->generate();
 ```
 
-## Another Example
+## Complete Example
 
 I already use this library to the existing project with completed CRUD operations, you can found it [here](https://github.com/ngekoding/ci-crud). 
 
-Please look at these files:
+<details>
+<summary>Please look at these files:</summary>
+
 - application/composer.json
 - application/controllers/Post.php
 - application/models/M_post.php
@@ -194,3 +195,5 @@ Please look at these files:
 - application/views/posts/index-datatables-array.php
 - application/helpers/api_helper.php
 - assets/js/custom.js
+
+</details>

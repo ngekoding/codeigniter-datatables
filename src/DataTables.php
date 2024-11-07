@@ -214,7 +214,7 @@ class DataTables
                     $column = isset($this->columnAliases[$column])
                                 ? $this->columnAliases[$column]
                                 : $column;
-					
+                    $keyword = addslashes($keyword);
 					$globalSearch[] = sprintf("`%s` LIKE '%%%s%%'", $column, $keyword);
 				}
 			}
@@ -244,7 +244,7 @@ class DataTables
                 $column = isset($this->columnAliases[$column])
                             ? $this->columnAliases[$column]
                             : $column;
-
+                $keyword = addslashes($keyword);
 				$columnSearch[] = sprintf("`%s` LIKE '%%%s%%'", $column, $keyword);
 			}
 		}

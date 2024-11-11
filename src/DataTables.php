@@ -172,6 +172,34 @@ class DataTables
     }
 
     /**
+     * Resolves the column name
+     * 
+     * @param int|string $column The column index or name, depending on `asObject`
+     * @return string|null The resolved column name or NULL if out of bounds
+     */
+    protected function resolveColumnName($column)
+    {
+        if ( ! $this->asObject) {
+            $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
+
+            // Skip sequence number and extra column
+            if (
+                ($this->sequenceNumber && $column == 0) OR
+                $fieldIndex > count($this->returnedFieldNames) - 1
+            ) return NULL;
+            
+            $column = $this->returnedFieldNames[$fieldIndex];
+        }
+
+        // Checking if it using a column alias
+        $column = isset($this->columnAliases[$column])
+                    ? $this->columnAliases[$column]
+                    : $column;
+
+        return $column;
+    }
+
+    /**
      * Add sequence number to the output
      * @param string $key Used when returning object output as the key
      */
@@ -188,37 +216,31 @@ class DataTables
     protected function filter()
     {
         $globalSearch = [];
-		$columnSearch = [];
-
-        $fieldNamesLength = count($this->returnedFieldNames);
 
         // Global column filtering
 		if ($this->request->get('search') && ($keyword = $this->request->get('search')['value']) != '') {
 			foreach ($this->request->get('columns', []) as $request_column) {
 				if (filter_var($request_column['searchable'], FILTER_VALIDATE_BOOLEAN)) {
                     $column = $request_column['data'];
-
-                    if ( ! $this->asObject) {
-                        // Skip sequence number
-                        if ($this->sequenceNumber && $column == 0) continue;
-
-                        $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
-
-                        // Skip extra column
-                        if ($fieldIndex > $fieldNamesLength - 1) break;
-                        
-                        $column = $this->returnedFieldNames[$fieldIndex];
-                    }
-
-                    // Checking if it using a column alias
-                    $column = isset($this->columnAliases[$column])
-                                ? $this->columnAliases[$column]
-                                : $column;
+                    $column = $this->resolveColumnName($column);
 					
-					$globalSearch[] = sprintf("`%s` LIKE '%%%s%%'", $column, $keyword);
+                    if (empty($column)) continue;
+                    
+					$globalSearch[] = $column;
 				}
 			}
 		}
+
+        // Apply global search criteria
+        if (!empty($globalSearch)) {
+            $this->queryBuilder->{$this->config->get('groupStart')}();
+            
+            foreach ($globalSearch as $column) {
+                $this->queryBuilder->{$this->config->get('orLike')}($column, $keyword);    
+            }
+
+            $this->queryBuilder->{$this->config->get('groupEnd')}();
+        }
 
 		// Individual column filtering
 		foreach ($this->request->get('columns', []) as $request_column) {
@@ -227,43 +249,13 @@ class DataTables
 				($keyword = $request_column['search']['value']) != ''
 			) {
                 $column = $request_column['data'];
+                $column = $this->resolveColumnName($column);
+                
+                if (empty($column)) continue;
 
-                if ( ! $this->asObject) {
-                    // Skip sequence number
-                    if ($this->sequenceNumber && $column == 0) continue;
-
-                    $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
-
-                    // Skip extra column
-                    if ($fieldIndex > $fieldNamesLength - 1) break;
-                    
-                    $column = $this->returnedFieldNames[$fieldIndex];
-                }
-
-                // Checking if it using a column alias
-                $column = isset($this->columnAliases[$column])
-                            ? $this->columnAliases[$column]
-                            : $column;
-
-				$columnSearch[] = sprintf("`%s` LIKE '%%%s%%'", $column, $keyword);
+				// Apply column-specific search criteria
+                $this->queryBuilder->{$this->config->get('like')}($column, $keyword);
 			}
-		}
-
-		// Merge global search & column search
-		$w_filter = '';
-
-		if ( ! empty($globalSearch)) {
-			$w_filter = '(' . implode(' OR ', $globalSearch) . ')';
-		}
-
-		if ( ! empty($columnSearch)) {
-			$w_filter = $w_filter === '' ?
-				implode(' AND ', $columnSearch) :
-				$w_filter . ' AND ' . implode(' AND ', $columnSearch);
-		}
-
-		if ($w_filter !== '') {
-			$this->queryBuilder->{$this->config->get('where')}($w_filter);
 		}
 
 		$this->recordsFiltered = $this->queryBuilder->{$this->config->get('countAllResults')}('', FALSE);
@@ -275,34 +267,19 @@ class DataTables
     protected function order()
     {
         if ($this->request->get('order') && count($this->request->get('order'))) {
-			$orders = [];
-            $fieldNamesLength = count($this->returnedFieldNames);
-            
 			foreach ($this->request->get('order') as $order) {
 				$column_idx = $order['column'];
 				$request_column = $this->request->get('columns')[$column_idx];
                 
 				if (filter_var($request_column['orderable'], FILTER_VALIDATE_BOOLEAN)) {
                     $column = $request_column['data'];
+                    $column = $this->resolveColumnName($column);
 
-                    if ( ! $this->asObject) {
-                        // Skip sequence number
-                        if ($this->sequenceNumber && $column == 0) continue;
-                        
-                        $fieldIndex = $this->sequenceNumber ? $column - 1 : $column;
-                        
-                        // Skip extra column
-                        if ($fieldIndex > $fieldNamesLength - 1) break;
+                    if (empty($column)) continue;
 
-                        $column = $this->returnedFieldNames[$fieldIndex];
-                    }
-
-					$orders[] = sprintf('`%s` %s', $column, strtoupper($order['dir']));
+                    // Apply order
+                    $this->queryBuilder->{$this->config->get('orderBy')}($column, $order['dir']);
 				}
-			}
-
-			if (!empty($orders)) {
-				$this->queryBuilder->{$this->config->get('orderBy')}(implode(', ', $orders));
 			}
 		}
     }

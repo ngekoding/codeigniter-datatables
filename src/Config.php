@@ -15,12 +15,16 @@ class Config
             'countAllResults' => 'count_all_results',
             'orderBy' => 'order_by',
             'where' => 'where',
+            'like' => 'like',
+            'orLike' => 'or_like',
             'limit' => 'limit',
             'get' => 'get',
             'QBSelect' => 'qb_select',
             'getFieldNames' => 'list_fields',
             'getResult' => 'result',
             'getResultArray' => 'result_array',
+            'groupStart' => 'group_start',
+            'groupEnd' => 'group_end'
         ]
     ];
 

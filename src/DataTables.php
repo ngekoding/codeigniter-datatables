@@ -41,11 +41,7 @@ class DataTables
         $this->request = Request::createFromGlobals();
         $this->queryBuilder = $queryBuilder;
 
-        $replection = new \ReflectionProperty($queryBuilder, $this->config->get('QBSelect'));
-        $replection->setAccessible(TRUE);
-
-        $qbSelect = $replection->getValue($queryBuilder);
-        $this->columnAliases = Helper::getColumnAliases($qbSelect);
+        $this->columnAliases = Helper::getColumnAliases($queryBuilder, $this->config);
 
         // When getting the field names, the query builder will be changed
         // So we need to make a clone to keep the original

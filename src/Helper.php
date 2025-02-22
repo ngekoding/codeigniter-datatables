@@ -6,28 +6,62 @@ use PHPSQLParser\PHPSQLParser;
 
 class Helper
 {
-    public static function getColumnAliases($qbSelect)
+    public static function getColumnAliases($queryBuilder, $config)
     {
-        if (empty($qbSelect)) return [];
+        $queryBuilderClone = clone $queryBuilder;
+        $compiledSelect = $queryBuilderClone->{$config->get('getCompiledSelect')}();
 
-        $sql = 'SELECT '.implode(', ', $qbSelect);
         $parser = new PHPSQLParser();
-        $parsed = $parser->parse($sql);
+        $parsed = $parser->parse($compiledSelect);
+
+        $tableAliases = [];
+        foreach ($parsed['FROM'] as $from) {
+            if ($from['expr_type'] === 'table') {
+                $name = $from['no_quotes']['parts'][0];
+                $alias = isset($from['alias']['name']) ? $from['alias']['no_quotes']['parts'][0] : $name;
+                $tableAliases[$alias] = $name;
+            }
+        }
 
         $columnAliases = [];
         foreach ($parsed['SELECT'] as $select) {
-            if ($select['alias']) {
-                $alias = $select['alias']['name'];
-                if ($select['expr_type'] == 'colref') {
-                    $key = $select['base_expr'];
-                } elseif (strpos($select['expr_type'], 'function') !== FALSE) {
+            $expr_type = $select['expr_type'];
+            $base_expr = $select['base_expr'];
+
+            if (isset($select['alias']['name'])) {
+                $alias = $select['alias']['no_quotes']['parts'][0];
+
+                if ($expr_type === 'colref') {
+                    $key = implode('.', $select['no_quotes']['parts']);
+                } elseif ($expr_type === 'expression') {
+                    $key = trim(str_replace($alias, '', $base_expr));
+                } elseif (str_contains($expr_type, 'function')) {
                     $parts = [];
                     foreach ($select['sub_tree'] as $part) {
                         $parts[] = $part['base_expr'];
                     }
-                    $key =  $select['base_expr'].'('.implode(', ', $parts).')';
+                    $key =  $base_expr . '(' . implode(', ', $parts) . ')';
                 }
                 $columnAliases[$alias] = $key;
+            } elseif ($expr_type === 'colref') {
+                if (str_contains($base_expr, '*')) {
+                    if (str_contains($base_expr, '.')) {
+                        $tableAlias = $select['no_quotes']['parts'][0];
+                    } else {
+                        $tableAlias = array_key_first($tableAliases);
+                    }
+
+                    $tableName = $tableAliases[$tableAlias];
+                    $fields = $queryBuilder->{$config->get('getFieldNames')}($tableName);
+                    foreach ($fields as $field) {
+                        $key = "{$tableAlias}.{$field}";
+                        $columnAliases[$field] = $key;
+                    } 
+                } elseif (str_contains($base_expr, '.')) {
+                    $field = $select['no_quotes']['parts'][1];
+                    $key = implode('.', $select['no_quotes']['parts']);
+                    $columnAliases[$field] = $key;
+                } 
             }
         }
 

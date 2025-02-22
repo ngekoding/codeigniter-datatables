@@ -23,6 +23,7 @@ class Config
             'getFieldNames' => 'list_fields',
             'getResult' => 'result',
             'getResultArray' => 'result_array',
+            'getCompiledSelect' => 'get_compiled_select',
             'groupStart' => 'group_start',
             'groupEnd' => 'group_end'
         ]

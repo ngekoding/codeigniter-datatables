@@ -176,6 +176,18 @@ $datatables->addColumnAliases([
 $datatables->addSequenceNumber();
 $datatables->addSequenceNumber('rowNumber'); // It will be rowNumber
 
+// Add order escape for a specific column
+// Useful when ordering by raw expressions or aggregate functions like COUNT()
+// This will skip identifier protection for the given column
+$datatables->addOrderEscape('name', FALSE);
+
+// Add order escapes for multiple columns at once
+// Each key is the column name, and the value is the escape flag (TRUE/FALSE)
+$datatables->addOrderEscapes([
+  'name' => FALSE,
+  'category' => FALSE
+]);
+
 // Don't forget to call generate to get the results
 $datatables->generate();
 ```

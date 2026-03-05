@@ -17,6 +17,7 @@ class DataTables
     protected $returnedFieldNames = [];
     protected $formatters = [];
     protected $extraColumns = [];
+    protected $orderEscapes = [];
     
     protected $recordsTotal;
     protected $recordsFiltered;
@@ -105,6 +106,41 @@ class DataTables
 
         foreach ($aliases as $key => $alias) {
             $this->addColumnAlias($key, $alias);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add an order escape rule for a specific column
+     * Useful when ordering by raw expressions or columns with aggregate functions
+     * @param string $column The column name
+     * @param bool $escape Whether to escape/protect the identifier (TRUE/FALSE)
+     * 
+     * @return $this
+     */
+    public function addOrderEscape($column, $escape)
+    {
+        $column = $this->resolveColumnName($column);
+        
+        $this->orderEscapes[$column] = $escape;
+        return $this;
+    }
+
+    /**
+     * Add multiple order escape rules at once
+     * @param array $columns An array of column => escape_boolean pairs
+     * 
+     * @return $this
+     */
+    public function addOrderEscapes($columns)
+    {
+        if (!is_array($columns)) {
+            throw new \Exception('The $columns parameter must be an array with key => escape_boolean.');
+        }
+
+        foreach ($columns as $column => $escape) {
+            $this->addOrderEscape($column, $escape);
         }
 
         return $this;
@@ -273,8 +309,12 @@ class DataTables
 
                     if (empty($column)) continue;
 
+                    $escape = isset($this->orderEscapes[$column])
+                        ? $this->orderEscapes[$column]
+                        : NULL;
+
                     // Apply order
-                    $this->queryBuilder->{$this->config->get('orderBy')}($column, $order['dir']);
+                    $this->queryBuilder->{$this->config->get('orderBy')}($column, $order['dir'], $escape);
 				}
 			}
 		}

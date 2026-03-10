@@ -190,6 +190,9 @@ $datatables->addOrderEscapes([
 
 // Don't forget to call generate to get the results
 $datatables->generate();
+
+// Optional usage: get the response data as an array instead of sending JSON
+$data = $datatables->generate(true);
 ```
 
 ## Complete Example

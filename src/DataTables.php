@@ -342,9 +342,15 @@ class DataTables
     }
 
     /**
-     * Generate the datatables results
+     * Generate DataTables results.
+     *
+     * By default, sends JSON response and exits. 
+     * If $return = true, returns the response data as an array instead.
+     *
+     * @param bool $return Optional. Return array instead of sending JSON. Default: false.
+     * @return array|null Response array if $return = true, otherwise null.
      */
-    public function generate()
+    public function generate($return = FALSE)
     {
         $this->setReturnedFieldNames();
         $this->filter();
@@ -380,13 +386,19 @@ class DataTables
             }
         }
 
-        $response = new JsonResponse();
-        $response->setData([
+        $responseData = [
             'draw' => $this->request->get('draw'),
             'recordsTotal' => $this->recordsTotal,
             'recordsFiltered' => $this->recordsFiltered,
             'data' => $output
-        ]);
+        ];
+
+        if ($return) {
+            return $responseData;
+        }
+
+        $response = new JsonResponse();
+        $response->setData($responseData);
         $response->send();
         exit;
     }
